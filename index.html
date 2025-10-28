@@ -1,0 +1,662 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <!-- Local Bootstrap CSS -->
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css"/>
+
+    <!-- Your local tokens and overrides -->
+    <link rel="stylesheet" href="assets/css/tokens.css"/>
+    <link rel="stylesheet" href="assets/css/main.css"/>
+
+    <title>HR Management System</title>
+
+    <style>
+      /* =========================================================
+         Theme: Pink, Purple, Blue
+         These complement your existing tokens.css if present.
+      ==========================================================*/
+      :root{
+        --hr-pink:   #f472b6; /* pink-400 */
+        --hr-purple: #8b5cf6; /* violet-500 */
+        --hr-blue:   #3b82f6; /* blue-500 */
+        --hr-ink:    #0f172a; /* slate-900 */
+        --hr-paper:  #0b1020;
+        --hr-soft:   #eef2ff;
+      }
+
+      body{
+        background: linear-gradient(135deg, rgba(139,92,246,0.08), rgba(59,130,246,0.08)) fixed, #0b1020;
+        color:#e6e6e9;
+      }
+
+      .brand-gradient{
+        background: linear-gradient(90deg, var(--hr-pink), var(--hr-purple), var(--hr-blue));
+      }
+
+      .ink{ color:#ffffff; }
+
+      .chip{
+        display:inline-block; padding:.25rem .5rem; border-radius:999px;
+        background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12);
+        font-size:.8rem
+      }
+
+      .card{
+        background: rgba(255,255,255,0.04);
+        border:1px solid rgba(255,255,255,0.12);
+        box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      }
+
+      .section-title{
+        background: linear-gradient(90deg, rgba(244,114,182,.2), rgba(139,92,246,.2), rgba(59,130,246,.2));
+        border-left:4px solid var(--hr-purple);
+        padding:.75rem 1rem; border-radius:.5rem; margin-bottom:1rem
+      }
+
+      a.nav-link{ color:#d1d5db }
+      a.nav-link.active, a.nav-link:hover{ color:#fff }
+
+      .btn-ppb{
+        background: linear-gradient(90deg, var(--hr-pink), var(--hr-purple));
+        border:0; color:#fff;
+      }
+      .btn-ppb:focus,.btn-ppb:hover{ filter:brightness(1.05) }
+      .btn-blue{
+        background: var(--hr-blue); border:0; color:#fff;
+      }
+      .form-label{ color:#e8e9ef }
+      .table thead th{ color:#cbd5e1; border-color:rgba(255,255,255,.1) }
+      .table tbody td{ border-color:rgba(255,255,255,.06) }
+      .badge-soft{
+        background: rgba(59,130,246,.15);
+        color:#cfe3ff; border:1px solid rgba(59,130,246,.35)
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- =========================================================
+         Top Navbar
+    ==========================================================-->
+    <nav class="navbar navbar-expand-lg navbar-dark brand-gradient shadow-sm">
+      <div class="container">
+        <a class="navbar-brand fw-bold" href="#">HR MANAGEMENT SYSTEM</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topnav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div id="topnav" class="collapse navbar-collapse">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item"><a class="nav-link" href="#dashboard">Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link" href="#employment">Employment</a></li>
+            <li class="nav-item"><a class="nav-link" href="#reports">Reports</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <!-- =========================================================
+         Page Shell with Sidebar
+    ==========================================================-->
+    <div class="container py-4">
+      <div class="row g-4">
+        <!-- Sidebar: quick links -->
+        <aside class="col-12 col-lg-3">
+          <div class="card p-3 sticky-lg-top" style="top:1rem">
+            <h6 class="text-uppercase text-muted mb-2">Modules</h6>
+            <div class="list-group list-group-flush">
+              <a class="list-group-item bg-transparent nav-link" href="#attendance">Attendance</a>
+              <a class="list-group-item bg-transparent nav-link" href="#time-tracking">Time Tracking</a>
+              <a class="list-group-item bg-transparent nav-link" href="#leave">Leave Management</a>
+              <a class="list-group-item bg-transparent nav-link" href="#performance">Performance Tracking</a>
+              <a class="list-group-item bg-transparent nav-link" href="#recruitment">Recruitment</a>
+              <a class="list-group-item bg-transparent nav-link" href="#productivity">Productivity Tool</a>
+              <a class="list-group-item bg-transparent nav-link" href="#reports">Reports</a>
+              <a class="list-group-item bg-transparent nav-link" href="#access">Multi User Access</a>
+              <a class="list-group-item bg-transparent nav-link" href="#notifications">Notifications</a>
+              <a class="list-group-item bg-transparent nav-link" href="#dashboard">Dashboard Overview</a>
+              <a class="list-group-item bg-transparent nav-link" href="#employment">Employment Management</a>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Main content -->
+        <main class="col-12 col-lg-9">
+
+          <!-- Dashboard Overview -->
+          <section id="dashboard" class="mb-5">
+            <div class="section-title">
+              <h2 class="h4 m-0">Dashboard Overview</h2>
+            </div>
+            <div class="row g-3">
+              <div class="col-6 col-md-3">
+                <div class="card p-3 text-center">
+                  <small class="text-muted">Employees</small>
+                  <div class="display-6 fw-bold" id="statEmployees">0</div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="card p-3 text-center">
+                  <small class="text-muted">Present Today</small>
+                  <div class="display-6 fw-bold" id="statPresent">0</div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="card p-3 text-center">
+                  <small class="text-muted">On Leave</small>
+                  <div class="display-6 fw-bold" id="statLeave">0</div>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="card p-3 text-center">
+                  <small class="text-muted">Open Roles</small>
+                  <div class="display-6 fw-bold" id="statOpenRoles">0</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 1. Attendance Management -->
+          <section id="attendance" class="mb-5">
+            <div class="section-title">
+              <h2 class="h4 m-0">Attendance Management</h2>
+            </div>
+            <div class="card p-3">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <h6 class="mb-2">Daily actions</h6>
+                  <ul class="mb-3">
+                    <li>Employee check in with time stamp and method</li>
+                    <li>Employee check out with time stamp</li>
+                    <li>Auto compute total hours and overtime</li>
+                    <li>Geo capture or device fingerprint option for verification</li>
+                  </ul>
+                  <div class="d-flex gap-2">
+                    <button class="btn btn-ppb" id="btnCheckIn">Check In</button>
+                    <button class="btn btn-blue" id="btnCheckOut">Check Out</button>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <h6 class="mb-2">Policies</h6>
+                  <ul class="mb-0">
+                    <li>Grace period window and late mark rules</li>
+                    <li>Public holiday calendar with site exceptions</li>
+                    <li>Shift templates with weekly rotations</li>
+                    <li>Export daily registers to CSV</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 2. Time Tracking -->
+          <section id="time-tracking" class="mb-5">
+            <div class="section-title">
+              <h2 class="h4 m-0">Time Tracking</h2>
+            </div>
+            <div class="card p-3">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <h6 class="mb-2">Timesheets</h6>
+                  <ul>
+                    <li>Log billable and non billable hours by project</li>
+                    <li>Manager approval flow with comments</li>
+                    <li>Weekly summaries for payroll</li>
+                  </ul>
+                </div>
+                <div class="col-md-6">
+                  <h6 class="mb-2">Timers</h6>
+                  <p class="mb-2">Simple start and stop timer for tasks.</p>
+                  <div class="d-flex gap-2">
+                    <button class="btn btn-ppb" id="timerStart">Start</button>
+                    <button class="btn btn-blue" id="timerStop">Stop</button>
+                    <span class="chip" id="timerDisplay">00:00:00</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 3. Leave Management -->
+          <section id="leave" class="mb-5">
+            <div class="section-title">
+              <h2 class="h4 m-0">Leave Management</h2>
+            </div>
+            <div class="card p-3">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <h6 class="mb-2">Leave types</h6>
+                  <ul>
+                    <li>Annual, Sick, Compassionate, Maternity, Study, Unpaid</li>
+                    <li>Accrual rules by tenure and grade</li>
+                    <li>Carry forward and encashment settings</li>
+                  </ul>
+                </div>
+                <div class="col-md-6">
+                  <h6 class="mb-2">Workflow</h6>
+                  <ul>
+                    <li>Apply with attachments and notes</li>
+                    <li>Multi level approval and delegation</li>
+                    <li>Calendar view with conflicts and coverage</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 4. Performance Tracking -->
+          <section id="performance" class="mb-5">
+            <div class="section-title">
+              <h2 class="h4 m-0">Performance Tracking</h2>
+            </div>
+            <div class="card p-3">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <h6 class="mb-2">Objectives</h6>
+                  <ul>
+                    <li>Quarterly goals with key results and weight</li>
+                    <li>Self review and manager review forms</li>
+                    <li>Competency matrix and ratings</li>
+                  </ul>
+                </div>
+                <div class="col-md-6">
+                  <h6 class="mb-2">Feedback</h6>
+                  <ul>
+                    <li>Continuous feedback with notes</li>
+                    <li>One on one meeting log and action items</li>
+                    <li>Growth plan with due dates</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 5. Recruitment -->
+          <section id="recruitment" class="mb-5">
+            <div class="section-title">
+              <h2 class="h4 m-0">Recruitment</h2>
+            </div>
+            <div class="card p-3">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <h6 class="mb-2">Pipeline</h6>
+                  <ul>
+                    <li>Job posts with role, grade, and location</li>
+                    <li>Stages for screening, interview, offer, hire</li>
+                    <li>Scorecards and interview notes</li>
+                  </ul>
+                </div>
+                <div class="col-md-6">
+                  <h6 class="mb-2">Compliance</h6>
+                  <ul>
+                    <li>KYC and right to work checklist</li>
+                    <li>Offer letter templates and approvals</li>
+                    <li>Candidate source tracking</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 6. Productivity Tool -->
+          <section id="productivity" class="mb-5">
+            <div class="section-title">
+              <h2 class="h4 m-0">Productivity Tool</h2>
+            </div>
+            <div class="card p-3">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <h6 class="mb-2">Tasks</h6>
+                  <div class="input-group mb-2">
+                    <input id="taskInput" class="form-control" placeholder="New task"/>
+                    <button id="taskAdd" class="btn btn-ppb">Add</button>
+                  </div>
+                  <ul id="taskList" class="list-group list-group-flush"></ul>
+                </div>
+                <div class="col-md-6">
+                  <h6 class="mb-2">Notes</h6>
+                  <textarea class="form-control" rows="6" placeholder="Quick notes"></textarea>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 7. Reports -->
+          <section id="reports" class="mb-5">
+            <div class="section-title">
+              <h2 class="h4 m-0">Reports</h2>
+            </div>
+            <div class="card p-3">
+              <ul class="mb-2">
+                <li>Attendance summary by site and team</li>
+                <li>Leave balance and movement</li>
+                <li>Timesheet utilization by project</li>
+                <li>Headcount trend and attrition</li>
+                <li>Performance score distribution</li>
+              </ul>
+              <button class="btn btn-blue">Export CSV</button>
+            </div>
+          </section>
+
+          <!-- 8. Multiple User Access and Level Control -->
+          <section id="access" class="mb-5">
+            <div class="section-title">
+              <h2 class="h4 m-0">Multiple User Access and Level Control</h2>
+            </div>
+            <div class="card p-3">
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <h6 class="mb-2">Roles</h6>
+                  <ul>
+                    <li>Owner, Admin, HR Manager, Manager, Employee</li>
+                    <li>Fine permissions for view, create, edit, approve</li>
+                    <li>Site and department scope</li>
+                  </ul>
+                </div>
+                <div class="col-md-6">
+                  <h6 class="mb-2">Security</h6>
+                  <ul>
+                    <li>Two factor option and session control</li>
+                    <li>Audit log for all sensitive actions</li>
+                    <li>Data export permissions</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 9. Notifications -->
+          <section id="notifications" class="mb-5">
+            <div class="section-title">
+              <h2 class="h4 m-0">Notifications</h2>
+            </div>
+            <div class="card p-3">
+              <p class="mb-2">Email and in app alerts for approvals, new tasks, expiring documents, and shift changes.</p>
+              <div class="d-flex gap-2">
+                <button class="btn btn-ppb" id="btnNotify">Show Sample Notification</button>
+                <span class="chip">Quiet hours 21:00 to 07:00</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- 10. Dashboard already at top -->
+
+          <!-- 11. Employment Management -->
+          <section id="employment" class="mb-5">
+            <div class="section-title">
+              <h2 class="h4 m-0">Employment Management</h2>
+              <small class="text-muted">Add Employee • View Employee • Delete Employee</small>
+            </div>
+
+            <!-- Add Employee -->
+            <div class="card p-3 mb-4">
+              <h6 class="mb-3">Add Employee</h6>
+              <form id="empForm" class="row g-3">
+                <!-- left column -->
+                <div class="col-md-6">
+                  <label class="form-label">Full name</label>
+                  <input required class="form-control" id="empName" placeholder="Jane Doe"/>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Email</label>
+                  <input required type="email" class="form-control" id="empEmail" placeholder="jane@company.com"/>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Phone</label>
+                  <input class="form-control" id="empPhone" placeholder="+260 9xx xxx xxx"/>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Department</label>
+                  <input class="form-control" id="empDept" placeholder="Operations"/>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Position</label>
+                  <input class="form-control" id="empRole" placeholder="Supervisor"/>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Start date</label>
+                  <input type="date" class="form-control" id="empStart"/>
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label">Employment type</label>
+                  <select class="form-select" id="empType">
+                    <option>Full Time</option>
+                    <option>Part Time</option>
+                    <option>Contract</option>
+                    <option>Intern</option>
+                  </select>
+                </div>
+                <div class="col-12 d-flex gap-2">
+                  <button class="btn btn-ppb" type="submit">Save Employee</button>
+                  <button class="btn btn-outline-light" type="reset">Reset</button>
+                </div>
+              </form>
+            </div>
+
+            <!-- View Employee -->
+            <div class="card p-3 mb-4">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0">View Employee</h6>
+                <span class="badge badge-soft" id="empCount">0 employees</span>
+              </div>
+              <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0" id="empTable">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Phone</th>
+                      <th>Dept</th>
+                      <th>Role</th>
+                      <th>Type</th>
+                      <th>Start</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <!-- rows injected by JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Delete Employee -->
+            <div class="card p-3">
+              <h6 class="mb-2">Delete Employee</h6>
+              <p class="mb-2">Use the bin icon in the table to remove a record. This demo performs an in memory delete.</p>
+              <button class="btn btn-blue" id="seedDemo">Seed Demo Employees</button>
+            </div>
+          </section>
+
+        </main>
+      </div>
+    </div>
+
+    <!-- Toast for notifications -->
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index:1080">
+      <div id="demoToast" class="toast text-bg-dark border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header">
+          <span class="rounded me-2" style="width:.75rem;height:.75rem;background:linear-gradient(90deg,#f472b6,#8b5cf6)"></span>
+          <strong class="me-auto">HR Notice</strong>
+          <small>now</small>
+          <button type="button" class="btn-close btn-close-white ms-2 mb-1" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+          Sample notification. Action recorded successfully.
+        </div>
+      </div>
+    </div>
+
+    <!-- Local Bootstrap JS -->
+    <script src="bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- App JS: light demo logic for Employment, Tasks, Timer, Attendance -->
+    <script>
+      /* =========================================================
+         Tiny in-memory store for demo purposes
+      ==========================================================*/
+      const store = {
+        employees: [],
+        presentToday: 0,
+        onLeave: 0,
+        openRoles: 0,
+        timer: { start: null, tick: null }
+      };
+
+      /* =========================================================
+         Utility helpers
+      ==========================================================*/
+      const byId = (id) => document.getElementById(id);
+
+      function refreshStats(){
+        byId('statEmployees').textContent = store.employees.length;
+        byId('empCount').textContent = store.employees.length + ' employees';
+        byId('statPresent').textContent = store.presentToday;
+        byId('statLeave').textContent = store.onLeave;
+        byId('statOpenRoles').textContent = store.openRoles;
+      }
+
+      function pushToast(text){
+        const toastEl = byId('demoToast');
+        toastEl.querySelector('.toast-body').textContent = text;
+        const t = new bootstrap.Toast(toastEl);
+        t.show();
+      }
+
+      /* =========================================================
+         Employment: render table
+      ==========================================================*/
+      function renderEmployees(){
+        const tbody = byId('empTable').querySelector('tbody');
+        tbody.innerHTML = '';
+        store.employees.forEach((e, i)=>{
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${i+1}</td>
+            <td>${e.name}</td>
+            <td>${e.email}</td>
+            <td>${e.phone ?? ''}</td>
+            <td>${e.dept ?? ''}</td>
+            <td>${e.role ?? ''}</td>
+            <td>${e.type ?? ''}</td>
+            <td>${e.start ?? ''}</td>
+            <td class="text-end">
+              <button class="btn btn-sm btn-outline-light" data-index="${i}" title="Delete">
+                🗑
+              </button>
+            </td>`;
+          tbody.appendChild(tr);
+        });
+        refreshStats();
+      }
+
+      /* Delete via table action */
+      byId('empTable').addEventListener('click', (e)=>{
+        const btn = e.target.closest('button[data-index]');
+        if(!btn) return;
+        const idx = Number(btn.getAttribute('data-index'));
+        const removed = store.employees.splice(idx,1);
+        renderEmployees();
+        pushToast(`Deleted ${removed[0]?.name ?? 'employee'}`);
+      });
+
+      /* Seed demo data */
+      byId('seedDemo').addEventListener('click', ()=>{
+        store.employees = [
+          {name:'Jane Doe', email:'jane@company.com', phone:'+260 970 000 001', dept:'Operations', role:'Supervisor', type:'Full Time', start:'2025-01-06'},
+          {name:'John Banda', email:'john@company.com', phone:'+260 977 000 002', dept:'Finance', role:'Accounts Assistant', type:'Full Time', start:'2025-02-03'}
+        ];
+        renderEmployees();
+        pushToast('Seeded two demo employees');
+      });
+
+      /* Add Employee form */
+      byId('empForm').addEventListener('submit',(ev)=>{
+        ev.preventDefault();
+        const emp = {
+          name: byId('empName').value.trim(),
+          email: byId('empEmail').value.trim(),
+          phone: byId('empPhone').value.trim(),
+          dept: byId('empDept').value.trim(),
+          role: byId('empRole').value.trim(),
+          start: byId('empStart').value,
+          type: byId('empType').value
+        };
+        store.employees.push(emp);
+        ev.target.reset();
+        renderEmployees();
+        pushToast('Employee saved');
+      });
+
+      /* =========================================================
+         Tasks: simple add and complete
+      ==========================================================*/
+      byId('taskAdd').addEventListener('click', ()=>{
+        const input = byId('taskInput');
+        const text = input.value.trim();
+        if(!text) return;
+        const li = document.createElement('li');
+        li.className = 'list-group-item bg-transparent d-flex justify-content-between align-items-center';
+        li.innerHTML = `<span>${text}</span><button class="btn btn-sm btn-outline-light">Done</button>`;
+        li.querySelector('button').addEventListener('click', ()=>{
+          li.remove();
+          pushToast('Task completed');
+        });
+        byId('taskList').appendChild(li);
+        input.value = '';
+      });
+
+      /* =========================================================
+         Attendance buttons: sample counters
+      ==========================================================*/
+      byId('btnCheckIn').addEventListener('click', ()=>{
+        store.presentToday += 1;
+        refreshStats();
+        pushToast('Check in recorded');
+      });
+      byId('btnCheckOut').addEventListener('click', ()=>{
+        if(store.presentToday>0) store.presentToday -= 1;
+        refreshStats();
+        pushToast('Check out recorded');
+      });
+
+      /* =========================================================
+         Notifications
+      ==========================================================*/
+      byId('btnNotify').addEventListener('click', ()=>{
+        pushToast('Reminder sent to approvers');
+      });
+
+      /* =========================================================
+         Timer for Time Tracking
+      ==========================================================*/
+      function formatHHMMSS(ms){
+        const s = Math.max(0, Math.floor(ms/1000));
+        const hh = String(Math.floor(s/3600)).padStart(2,'0');
+        const mm = String(Math.floor((s%3600)/60)).padStart(2,'0');
+        const ss = String(s%60).padStart(2,'0');
+        return `${hh}:${mm}:${ss}`;
+      }
+      byId('timerStart').addEventListener('click', ()=>{
+        if(store.timer.start) return;
+        store.timer.start = Date.now();
+        store.timer.tick = setInterval(()=>{
+          byId('timerDisplay').textContent = formatHHMMSS(Date.now() - store.timer.start);
+        }, 250);
+      });
+      byId('timerStop').addEventListener('click', ()=>{
+        if(!store.timer.start) return;
+        clearInterval(store.timer.tick);
+        store.timer.start = null;
+        store.timer.tick = null;
+        pushToast('Timer stopped');
+      });
+
+      /* Initial render */
+      renderEmployees();
+    </script>
+  </body>
+</html>
