@@ -1,0 +1,387 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User Management
+model User {
+  id          String   @id @default(cuid())
+  employeeId  String   @unique @map("employee_id")
+  email       String   @unique
+  passwordHash String  @map("password_hash")
+  roleId      String   @map("role_id")
+  departmentId String? @map("department_id")
+  status      UserStatus @default(ACTIVE)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  role        Role        @relation(fields: [roleId], references: [id])
+  department  Department? @relation(fields: [departmentId], references: [id])
+  profile     Profile?
+  attendance  Attendance[]
+  leaveRequests LeaveRequest[]
+  leaveBalances LeaveBalance[]
+  performanceReviews PerformanceReview[] @relation("EmployeeReviews")
+  reviewsGiven PerformanceReview[] @relation("ReviewerReviews")
+  goals       Goal[]
+  notifications Notification[]
+  auditLogs   AuditLog[]
+  timeTracking TimeTracking[]
+
+  @@map("users")
+}
+
+model Profile {
+  id              String   @id @default(cuid())
+  userId          String   @unique @map("user_id")
+  firstName       String   @map("first_name")
+  lastName        String   @map("last_name")
+  phone           String?
+  address         String?
+  dateOfBirth     DateTime? @map("date_of_birth")
+  hireDate        DateTime @map("hire_date")
+  jobTitle        String?  @map("job_title")
+  salary          Decimal? @db.Decimal(12, 2)
+  profilePicture  String?  @map("profile_picture")
+  emergencyContact Json?   @map("emergency_contact")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+model Department {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  managerId   String?  @map("manager_id")
+  budget      Decimal? @db.Decimal(15, 2)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  users       User[]
+  jobPostings JobPosting[]
+
+  @@map("departments")
+}
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  permissions Json
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  users User[]
+
+  @@map("roles")
+}
+
+// Attendance & Time Tracking
+model Attendance {
+  id            String   @id @default(cuid())
+  userId        String   @map("user_id")
+  date          DateTime @db.Date
+  clockIn       DateTime? @map("clock_in")
+  clockOut      DateTime? @map("clock_out")
+  breakDuration Int      @default(0) @map("break_duration") // minutes
+  totalHours    Decimal? @db.Decimal(4, 2) @map("total_hours")
+  status        AttendanceStatus @default(PRESENT)
+  notes         String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+
+  @@unique([userId, date])
+  @@map("attendance")
+}
+
+model TimeTracking {
+  id              String   @id @default(cuid())
+  userId          String   @map("user_id")
+  projectName     String?  @map("project_name")
+  taskDescription String?  @map("task_description")
+  startTime       DateTime @map("start_time")
+  endTime         DateTime? @map("end_time")
+  duration        Int?     // minutes
+  billable        Boolean  @default(false)
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("time_tracking")
+}
+
+// Leave Management
+model LeaveType {
+  id                String   @id @default(cuid())
+  name              String
+  description       String?
+  maxDaysPerYear    Int?     @map("max_days_per_year")
+  carryForward      Boolean  @default(false) @map("carry_forward")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  // Relations
+  leaveBalances LeaveBalance[]
+  leaveRequests LeaveRequest[]
+
+  @@map("leave_types")
+}
+
+model LeaveBalance {
+  id             String   @id @default(cuid())
+  userId         String   @map("user_id")
+  leaveTypeId    String   @map("leave_type_id")
+  year           Int
+  allocatedDays  Int      @map("allocated_days")
+  usedDays       Int      @default(0) @map("used_days")
+  remainingDays  Int      @map("remaining_days")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user      User      @relation(fields: [userId], references: [id])
+  leaveType LeaveType @relation(fields: [leaveTypeId], references: [id])
+
+  @@unique([userId, leaveTypeId, year])
+  @@map("leave_balances")
+}
+
+model LeaveRequest {
+  id             String      @id @default(cuid())
+  userId         String      @map("user_id")
+  leaveTypeId    String      @map("leave_type_id")
+  startDate      DateTime    @db.Date @map("start_date")
+  endDate        DateTime    @db.Date @map("end_date")
+  daysRequested  Int         @map("days_requested")
+  reason         String?
+  status         LeaveStatus @default(PENDING)
+  approvedBy     String?     @map("approved_by")
+  approvedAt     DateTime?   @map("approved_at")
+  comments       String?
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+
+  // Relations
+  user      User      @relation(fields: [userId], references: [id])
+  leaveType LeaveType @relation(fields: [leaveTypeId], references: [id])
+
+  @@map("leave_requests")
+}
+
+// Performance Management
+model PerformanceReview {
+  id                   String        @id @default(cuid())
+  employeeId           String        @map("employee_id")
+  reviewerId           String        @map("reviewer_id")
+  reviewPeriodStart    DateTime      @db.Date @map("review_period_start")
+  reviewPeriodEnd      DateTime      @db.Date @map("review_period_end")
+  overallRating        Decimal?      @db.Decimal(3, 2) @map("overall_rating")
+  goalsAchievement     Decimal?      @db.Decimal(3, 2) @map("goals_achievement")
+  competencyRating     Decimal?      @db.Decimal(3, 2) @map("competency_rating")
+  feedback             String?
+  improvementAreas     String?       @map("improvement_areas")
+  status               ReviewStatus  @default(DRAFT)
+  createdAt            DateTime      @default(now()) @map("created_at")
+  updatedAt            DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  employee User @relation("EmployeeReviews", fields: [employeeId], references: [id])
+  reviewer User @relation("ReviewerReviews", fields: [reviewerId], references: [id])
+
+  @@map("performance_reviews")
+}
+
+model Goal {
+  id                 String     @id @default(cuid())
+  userId             String     @map("user_id")
+  title              String
+  description        String?
+  targetDate         DateTime?  @db.Date @map("target_date")
+  status             GoalStatus @default(NOT_STARTED)
+  progressPercentage Int        @default(0) @map("progress_percentage")
+  createdAt          DateTime   @default(now()) @map("created_at")
+  updatedAt          DateTime   @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("goals")
+}
+
+// Recruitment
+model JobPosting {
+  id             String         @id @default(cuid())
+  title          String
+  departmentId   String         @map("department_id")
+  description    String
+  requirements   String?
+  salaryRange    String?        @map("salary_range")
+  employmentType EmploymentType @map("employment_type")
+  location       String?
+  status         JobStatus      @default(DRAFT)
+  postedBy       String         @map("posted_by")
+  postedAt       DateTime?      @map("posted_at")
+  closingDate    DateTime?      @db.Date @map("closing_date")
+  createdAt      DateTime       @default(now()) @map("created_at")
+  updatedAt      DateTime       @updatedAt @map("updated_at")
+
+  // Relations
+  department   Department    @relation(fields: [departmentId], references: [id])
+  applications Application[]
+
+  @@map("job_postings")
+}
+
+model Candidate {
+  id              String   @id @default(cuid())
+  firstName       String   @map("first_name")
+  lastName        String   @map("last_name")
+  email           String   @unique
+  phone           String?
+  resumeUrl       String?  @map("resume_url")
+  coverLetter     String?  @map("cover_letter")
+  linkedinProfile String?  @map("linkedin_profile")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  applications Application[]
+
+  @@map("candidates")
+}
+
+model Application {
+  id              String            @id @default(cuid())
+  jobPostingId    String            @map("job_posting_id")
+  candidateId     String            @map("candidate_id")
+  status          ApplicationStatus @default(APPLIED)
+  applicationDate DateTime          @default(now()) @map("application_date")
+  notes           String?
+  interviewDate   DateTime?         @map("interview_date")
+  offerAmount     Decimal?          @db.Decimal(12, 2) @map("offer_amount")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+
+  // Relations
+  jobPosting JobPosting @relation(fields: [jobPostingId], references: [id])
+  candidate  Candidate  @relation(fields: [candidateId], references: [id])
+
+  @@map("applications")
+}
+
+// Notifications & Audit
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String           @map("user_id")
+  title     String
+  message   String
+  type      NotificationType @default(INFO)
+  read      Boolean          @default(false)
+  actionUrl String?          @map("action_url")
+  createdAt DateTime         @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?  @map("user_id")
+  action     String
+  tableName  String?  @map("table_name")
+  recordId   String?  @map("record_id")
+  oldValues  Json?    @map("old_values")
+  newValues  Json?    @map("new_values")
+  ipAddress  String?  @map("ip_address")
+  userAgent  String?  @map("user_agent")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user User? @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}
+
+// Enums
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  HALF_DAY
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum ReviewStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+}
+
+enum GoalStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERNSHIP
+}
+
+enum JobStatus {
+  DRAFT
+  ACTIVE
+  CLOSED
+}
+
+enum ApplicationStatus {
+  APPLIED
+  SCREENING
+  INTERVIEW
+  OFFER
+  HIRED
+  REJECTED
+}
+
+enum NotificationType {
+  INFO
+  WARNING
+  SUCCESS
+  ERROR
+}
